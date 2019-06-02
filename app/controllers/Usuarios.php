@@ -23,10 +23,47 @@ class Usuarios extends Controller {
 			if ($result === true) {
 				redirect('usuarios/registro');
 			} else {
-				$this->view('usuarios/registro', $result);
+				$aVista = array_merge($aData, $result);
+				$this->view('usuarios/registro', $aVista);
 			}
 		} else {
-			$this->view('usuarios/registro');
+			$aData = [
+				'nombre' => '',
+				'apellido' => '',
+				'correo' => '',
+				'clave' => '',
+				'claveCon' => ''
+			];
+			$this->view('usuarios/registro', $aData);
 		}
+	}
+
+	public function login() {
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+			$correo = filter_input(INPUT_POST, 'correo');
+			$clave = filter_input(INPUT_POST, 'clave');
+
+			$aData = ['correo' => $correo, 'clave' => $clave];
+
+			$result = Usuario::iniciaSesion($aData);
+			if ($result === true) {
+				redirect('articulos/');
+			} else {
+				$aVista = array_merge($aData, $result);
+				$this->view('usuarios/login', $aVista);
+			}
+		} else {
+			$aData = [
+				'correo' => '',
+				'clave' => '',
+			];
+			$this->view('usuarios/login', $aData);
+		}
+	}
+
+	public function logout() {
+		unset($_SESSION['id']);
+		session_destroy();
+		redirect('usuarios/login');
 	}
 }

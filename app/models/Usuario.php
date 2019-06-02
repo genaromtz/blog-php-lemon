@@ -13,6 +13,109 @@ class Usuario {
 	private $created_at;
 	private $updated_at;
 
+	public function getId() {
+		return $this->id;
+	}
+	public function getIdPerfil() {
+		return $this->id_perfil;
+	}
+	public function getNombre() {
+		return $this->nombre;
+	}
+	public function getApellido() {
+		return $this->apellido;
+	}
+	public function getCorreo() {
+		return $this->correo;
+	}
+	public function getClave() {
+		return $this->clave;
+	}
+	public function getEstado() {
+		return $this->estado;
+	}
+	public function getImagen() {
+		return $this->imagen;
+	}
+	public function getCreatedAt() {
+		return $this->created_at;
+	}
+	public function getUpdatedAt() {
+		return $this->updated_at;
+	}
+
+	/**
+	 * [Inicia y llena propiedades del objeto usuario]
+	 * @param [integer] $id [Id usuario]
+	 * @return [boolean] [false no se pudo iniciar el objeto]
+	 */
+	public function __construct($id) {
+		$id = filter_var($id, FILTER_VALIDATE_INT);
+		if ($id > 0) {
+			$this->id = $id;
+			$result = $this->leeRegistros();
+			if ($result !== true) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * [Verifica claves de usuario e inicia la sesión]
+	 * @param [string] $correo [description]
+	 * @param [string] $clave [description]
+	 * @return [array] [Mensajes de validación]
+	 * @return [boolean] [true en caso de exito]
+	 */
+	public static function iniciaSesion(array $aData) {
+		$aErrores = [];
+		$aEsperados = ['correo', 'clave'];
+		foreach ($aData as $key => $value) {
+			if (in_array($key, $aEsperados)) {
+				$$key = trim($value);
+			} else {
+				$aErrores['errDato'] = "El campo {$key} no es aceptado";
+			}
+		}
+		if (empty($correo)) {
+			$aErrores['errCorreo'] = 'Ingresa tu correo electrónico';
+		}
+		if (empty($clave)) {
+			$aErrores['errClave'] = 'Ingresa tu contraseña';
+		}
+		if (empty($aErrores)) {
+			$result = self::correoUnico($correo);
+			if (is_numeric($result) && $result > 0) {
+				$_Usuario = new self($result);
+				$verificaClave = password_verify($clave, $_Usuario->getClave());
+				if ($verificaClave === true) {
+					if ($_Usuario->getEstado() == self::USUARIO_ACTIVO) {
+						$_SESSION['id'] = $_Usuario->getId();
+						return true;
+					} else {
+						$aErrores['errDato'] = 'Su cuenta esta inactiva';
+					}
+				} else {
+					$aErrores['errCorreo'] = 'El correo electrónico y/o contraseña no son válidos';
+					$aErrores['errClave'] = 'El correo electrónico y/o contraseña no son válidos';
+				}
+			} else {
+				$aErrores['errCorreo'] = 'El correo electrónico y/o contraseña no son válidos';
+				$aErrores['errClave'] = 'El correo electrónico y/o contraseña no son válidos';
+			}
+		}
+		return $aErrores;
+	}
+
+	/**
+	 * [Crea usuario en e sistema]
+	 * @param [array] $aData [Campos del formuario]
+	 * @return [boolean] [true caso exitoso]
+	 * @return [boolean] [false fallo en la base de datos]
+	 * @return array [Mensajes de validación]
+	 */
 	public static function creaUsuario(array $aData) {
 		$aErrores = $aBD = [];
 		$aEsperados = ['id_perfil', 'nombre', 'apellido', 'correo', 'clave', 'claveCon'];
@@ -39,7 +142,12 @@ class Usuario {
 		if (empty($correo)) {
 			$aErrores['errCorreo'] = 'Ingresa tu correo electrónico';
 		} else {
-			$aBD['correo'] = $correo;
+			$result = self::correoUnico($correo);
+			if (is_numeric($result) && $result > 0) {
+				$aErrores['errCorreo'] = 'El correo ya fue ocupado';
+			} else {
+				$aBD['correo'] = $correo;
+			}
 		}
 
 		if (empty($clave)) {
@@ -71,6 +179,51 @@ class Usuario {
 			return ($_BD->execute()) ? true : false;
 		} else {
 			return $aErrores;
+		}
+	}
+
+	/**
+	 * [Determina si existe un correo duplicado]
+	 * @param [string] $correo [Correo electrónico]
+	 * @return [integer] [id usuario se encontro el correo electrónico]
+	 * @return [boolean] [false no se encontro el correo electrónico]
+	 */
+	private static function correoUnico(string $correo) {
+		$_BD = new Database();
+		$_BD->query('SELECT id FROM usuarios WHERE correo = :correo');
+		$_BD->bind(':correo', $correo);
+		$row = $_BD->single();
+		if ($_BD->rowCount() > 0) {
+			return $row->id;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * [Lee registros e inicia las propiedades del objeto]
+	 * @return [boolean] [true caso de exito]
+	 * @return [boolean] [false no se encontro el registro]
+	 */
+	private function leeRegistros() {
+		$_BD = new Database();
+		$_BD->query('SELECT * FROM usuarios WHERE id = :id');
+		$_BD->bind(':id', $this->id);
+		$row = $_BD->single();
+		if ($_BD->rowCount() > 0) {
+			$this->id = $row->id;
+			$this->id_perfil = $row->id_perfil;
+			$this->nombre = $row->nombre;
+			$this->apellido = $row->apellido;
+			$this->correo = $row->correo;
+			$this->clave = $row->clave;
+			$this->estado = $row->estado;
+			$this->imagen = $row->imagen;
+			$this->created_at = $row->created_at;
+			$this->updated_at = $row->updated_at;
+			return true;
+		} else {
+			return false;
 		}
 	}
 }

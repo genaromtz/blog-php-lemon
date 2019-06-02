@@ -8,9 +8,18 @@
             <li class="nav-item active">
                 <a class="nav-link" href="<?=URLROOT?>">Inicio <span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="<?=URLROOT?>/usuarios/registro">Registrate</a>
-            </li>
+            <?php if (tieneSesion()) { ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?=URLROOT?>/usuarios/logout">Cerrar sesión</a>
+                </li>
+            <?php } else { ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?=URLROOT?>/usuarios/registro">Registrate</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<?=URLROOT?>/usuarios/login">Iniciar sesión</a>
+                </li>
+            <?php } ?>
             <li class="nav-item">
                 <a class="nav-link" href="#">Pricing</a>
             </li>
