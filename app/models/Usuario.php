@@ -13,6 +13,9 @@ class Usuario {
 	private $created_at;
 	private $updated_at;
 
+	//Objeto perfil
+	private $_Perfil;
+
 	public function getId() {
 		return $this->id;
 	}
@@ -43,6 +46,12 @@ class Usuario {
 	public function getUpdatedAt() {
 		return $this->updated_at;
 	}
+	public function getPerfil() {
+		if (empty($this->_Perfil)) {
+			$this->_Perfil = new Perfil($this->getIdPerfil());
+		}
+		return $this->_Perfil;
+	}
 
 	/**
 	 * [Inicia y llena propiedades del objeto usuario]
@@ -53,7 +62,7 @@ class Usuario {
 		$id = filter_var($id, FILTER_VALIDATE_INT);
 		if ($id > 0) {
 			$this->id = $id;
-			$result = $this->leeRegistros();
+			$result = $this->leeRegUsuario();
 			if ($result !== true) {
 				return false;
 			}
@@ -81,6 +90,10 @@ class Usuario {
 		}
 		if (empty($correo)) {
 			$aErrores['errCorreo'] = 'Ingresa tu correo electrónico';
+		}
+		$result = filter_var($correo, FILTER_VALIDATE_EMAIL);
+		if (empty($result)) {
+			$aErrores['errCorreo'] = 'Tu correo electrónico no es válido';
 		}
 		if (empty($clave)) {
 			$aErrores['errClave'] = 'Ingresa tu contraseña';
@@ -142,11 +155,16 @@ class Usuario {
 		if (empty($correo)) {
 			$aErrores['errCorreo'] = 'Ingresa tu correo electrónico';
 		} else {
-			$result = self::correoUnico($correo);
-			if (is_numeric($result) && $result > 0) {
-				$aErrores['errCorreo'] = 'El correo ya fue ocupado';
+			$result = filter_var($correo, FILTER_VALIDATE_EMAIL);
+			if (empty($result)) {
+				$aErrores['errCorreo'] = 'Tu correo electrónico no es válido';
 			} else {
-				$aBD['correo'] = $correo;
+				$result = self::correoUnico($correo);
+				if (is_numeric($result) && $result > 0) {
+					$aErrores['errCorreo'] = 'El correo ya fue ocupado';
+				} else {
+					$aBD['correo'] = $correo;
+				}
 			}
 		}
 
@@ -205,7 +223,7 @@ class Usuario {
 	 * @return [boolean] [true caso de exito]
 	 * @return [boolean] [false no se encontro el registro]
 	 */
-	private function leeRegistros() {
+	private function leeRegUsuario() {
 		$_BD = new Database();
 		$_BD->query('SELECT * FROM usuarios WHERE id = :id');
 		$_BD->bind(':id', $this->id);

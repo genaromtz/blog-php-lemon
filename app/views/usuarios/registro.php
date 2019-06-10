@@ -29,6 +29,7 @@
 					<input type="password" class="form-control <?=isset($data['errClaveCon']) ? 'is-invalid' : ''?>" value="<?=$data['claveCon']?>" name="claveCon">
 					<div class="invalid-feedback"><?=isset($data['errClaveCon']) ? $data['errClaveCon'] : ''?></div>
 				</div>
+				<input type="hidden" name="token" value="<?=$data['token']?>">
 				<button type="submit" class="btn btn-primary">Crea tu cuenta</button>
 			</form>
 		</div>

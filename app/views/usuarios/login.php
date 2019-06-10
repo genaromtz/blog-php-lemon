@@ -17,6 +17,7 @@
 					<input type="password" class="form-control <?=isset($data['errClave']) ? 'is-invalid' : ''?>" value="<?=$data['clave']?>" name="clave">
 					<div class="invalid-feedback"><?=isset($data['errClave']) ? $data['errClave'] : ''?></div>
 				</div>
+				<input type="hidden" name="token" value="<?=$data['token']?>">
 				<button type="submit" class="btn btn-primary">Inicia sesión</button>
 			</form>
 		</div>
