@@ -1,0 +1,21 @@
+[v-cloak] {
+	display: none;
+}
+
+/**
+ * Transición
+ */
+.u-flexColumnCenter {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.u-show {
+	display: initial;
+}
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .5s
+}
+.fade-enter, .fade-leave-to {
+	opacity: 0;
+}

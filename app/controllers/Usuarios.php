@@ -1,85 +1,46 @@
 <?php
 require_once APPROOT . '/models/Usuario.php';
-require_once APPROOT . '/models/Perfil.php';
 require_once APPROOT . '/helpers/global.php';
-require_once APPROOT . '/models/CsrfToken.php';
 
 class Usuarios extends Controller {
 
 	public function registro() {
-		//Verifica sesión
-		if (tieneSesion()) redirect('articulos/');
+		if (tieneSesion()) redirect('articulos/'); //Verifica sesión
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$nombre = filter_input(INPUT_POST, 'nombre');
-			$apellido = filter_input(INPUT_POST, 'apellido');
-			$correo = filter_input(INPUT_POST, 'correo');
-			$clave = filter_input(INPUT_POST, 'clave');
-			$claveCon = filter_input(INPUT_POST, 'claveCon');
-			$token = filter_input(INPUT_POST, 'token');
-
 			$aData = [
-				'nombre' => $nombre,
-				'apellido' => $apellido,
-				'correo' => $correo,
-				'clave' => $clave,
-				'claveCon' => $claveCon
+				'nombre' => filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+				'apellido' => filter_input(INPUT_POST, 'apellido', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+				'correo' => filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+				'clave' => filter_input(INPUT_POST, 'clave', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+				'claveCon' => filter_input(INPUT_POST, 'claveCon', FILTER_SANITIZE_FULL_SPECIAL_CHARS)
 			];
-
-			if (CsrfToken::varificaToken($token)) {
-				$result = Usuario::creaUsuario($aData);
-				if ($result === true) {
-					redirect('usuarios/login');
-				} else {
-					$aData['token'] = CsrfToken::generaToken();
-					$aVista = array_merge($aData, $result);
-					$this->view('usuarios/registro', $aVista);
-				}
+			$result = Usuario::creaUsuario($aData);
+			if ($result !== true) {
+				echo json_encode(['tipo' => 2, 'msg' => $result]);
 			} else {
-				$aData['token'] = CsrfToken::generaToken();
-				$this->view('usuarios/registro', $aData);
+				echo json_encode(['tipo' => 1, 'msg' => 'Cuenta creada con éxito']);
 			}
 		} else {
-			$aData = [
-				'nombre' => '',
-				'apellido' => '',
-				'correo' => '',
-				'clave' => '',
-				'claveCon' => '',
-				'token' => CsrfToken::generaToken()
-			];
-			$this->view('usuarios/registro', $aData);
+			$this->view('usuarios/registro');
 		}
 	}
 
 	public function login() {
-		//Verifica sesión
-		if (tieneSesion()) redirect('articulos/');
+		if (tieneSesion()) redirect('articulos/'); //Verifica sesión
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$correo = filter_input(INPUT_POST, 'correo');
-			$clave = filter_input(INPUT_POST, 'clave');
-			$token = filter_input(INPUT_POST, 'token');
-
-			$aData = ['correo' => $correo, 'clave' => $clave];
-			if (CsrfToken::varificaToken($token)) {
-				$result = Usuario::iniciaSesion($aData);
-				if ($result === true) {
-					redirect('articulos/');
-				} else {
-					$aData['token'] = CsrfToken::generaToken();
-					$aVista = array_merge($aData, $result);
-					$this->view('usuarios/login', $aVista);
-				}
+			$aData = [
+				'correo' => filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
+				'clave' => filter_input(INPUT_POST, 'clave', FILTER_SANITIZE_FULL_SPECIAL_CHARS)
+			];
+			$result = Usuario::iniciaSesion($aData);
+			if ($result !== true) {
+				echo json_encode(['tipo' => 2, 'msg' => $result]);
 			} else {
-				$aData['token'] = CsrfToken::generaToken();
-				$this->view('usuarios/login', $aVista);
+				$enlace = URLROOT.'/articulos/';
+				echo json_encode(['tipo' => 1, 'msg' => $enlace]);
 			}
 		} else {
-			$aData = [
-				'correo' => '',
-				'clave' => '',
-				'token' => CsrfToken::generaToken()
-			];
-			$this->view('usuarios/login', $aData);
+			$this->view('usuarios/login');
 		}
 	}
 
