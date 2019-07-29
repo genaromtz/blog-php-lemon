@@ -16,7 +16,7 @@ class Controller {
 	 * @param [array] $data [Datos del controlador]
 	 * @return [Vista html]
 	 */
-	public function view($view, $data = []) {
+	public function view($view) {
 		if (file_exists("../app/views/{$view}.php")) {
 			require_once "../app/views/{$view}.php";
 		} else {
