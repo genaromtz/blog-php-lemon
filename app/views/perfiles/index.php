@@ -1,4 +1,6 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
+
+<?php if ($perEdi) { ?>
 <div class="container mt-3">
 	<div class="row">
 		<div class="col-md-3">
@@ -6,6 +8,7 @@
 		</div>
 	</div>
 </div>
+<?php } ?>
 
 <div class="container mt-3">
 	<div class="row">
@@ -30,7 +33,7 @@
 								<td class="text-wrap"><?=$_Perfil->getNombre()?></td>
 								<td class="text-wrap"><?=$_Perfil->getEstado()?></td>
 								<td>
-									<a>
+									<a href="<?=URLROOT?>/perfiles/editar/<?=$_Perfil->getId()?>">
 										<i class="fa fa-eye"></i>
 									</a>
 								</td>

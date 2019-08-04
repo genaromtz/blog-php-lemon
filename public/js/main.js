@@ -96,6 +96,33 @@ const appPerfil = new Vue({
 				}
 			})
 		},
+		editaPerfil(e) {
+			formData = new FormData(e.target);
+			axios.post('editar', formData).then(res => {
+				if (res.data.tipo == 1) {
+					this.success = res.data.msg
+					this.mNombre = ''
+					this.mEstado = ''
+					this.mModUsu = ''
+					this.mModPer = ''
+					this.mModArt = ''
+					this.mGral = ''
+					this.procesando = false
+					 //e.target.reset()
+					setTimeout(() => {
+						this.success = ''
+					}, 6000)
+				} else if (res.data.tipo == 2) {
+					this.mNombre = res.data.msg.errNombre
+					this.mEstado = res.data.msg.errEstado
+					this.mModUsu = res.data.msg.errModUsu
+					this.mModPer = res.data.msg.errModPer
+					this.mModArt = res.data.msg.errModArt
+					this.mGral = res.data.msg.errGral
+					this.procesando = false
+				}
+			})
+		},
 		proBtn: function (event) {
 			this.procesando = true
 		}

@@ -2,8 +2,9 @@
 <div id="appPerfil" class="row">
 	<div class="col-md-6 mx-auto">
 		<div class="card card-body bg-light mt-3">
-			<h2>Nuevo perfil</h2>
-			<form @submit.prevent="creaPerfil" v-cloak>
+			<h2>Actualizar perfil</h2>
+			<form @submit.prevent="editaPerfil" v-cloak>
+				<input type="hidden" name="id" value="<?=$_Perfil->getId()?>">
 				<transition name="fade">
 					<span class="text-success u-flexColumnCenter alert alert-success" v-if="success">
 						<i class="fas fa-check-circle fa-sm mr-1"></i>{{success}}
@@ -17,7 +18,7 @@
 				<div class="form-row">
 					<div class="form-group col-md-6">
 						<label>Nombre</label>
-						<input <?=$dis?> type="text" class="form-control form-control-sm" name="nombre">
+						<input <?=$dis?> type="text" class="form-control form-control-sm" value="<?=$_Perfil->getNombre()?>" name="nombre">
 						<span v-if="mNombre" class="text-danger">
 							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mNombre}}
 						</span>
@@ -25,8 +26,9 @@
 					<div class="form-group col-md-6">
 						<label>Estado</label>
 						<select <?=$dis?> class="form-control form-control-sm" name="estado">
-							<?php foreach (Perfil::EST_PFL as $key => $value) { ?>
-								<option value="<?=$key?>"><?=$value?></option>
+							<?php foreach (Perfil::EST_PFL as $key => $value) {
+								$sel = ($key == $_Perfil->getEstado()) ? 'selected' : ''; ?>
+								<option <?=$sel?> value="<?=$key?>"><?=$value?></option>
 							<?php } ?>
 						</select>
 						<span v-if="mEstado" class="text-danger">
@@ -38,8 +40,9 @@
 					<div class="form-group col-md-6">
 						<label>Módulo usuarios</label>
 						<select <?=$dis?> class="form-control form-control-sm" name="modUsu">
-							<?php foreach (Perfil::A_PER as $key => $value) { ?>
-								<option value="<?=$key?>"><?=$value?></option>
+							<?php foreach (Perfil::A_PER as $key => $value) {
+								$sel = ($key == $_Perfil->getModUsu()) ? 'selected' : ''; ?>
+								<option <?=$sel?> value="<?=$key?>"><?=$value?></option>
 							<?php } ?>
 						</select>
 						<span v-if="mModUsu" class="text-danger">
@@ -49,8 +52,9 @@
 					<div class="form-group col-md-6">
 						<label>Módulo perfiles</label>
 						<select <?=$dis?> class="form-control form-control-sm" name="modPer">
-							<?php foreach (Perfil::A_PER as $key => $value) { ?>
-								<option value="<?=$key?>"><?=$value?></option>
+							<?php foreach (Perfil::A_PER as $key => $value) {
+								$sel = ($key == $_Perfil->getModPer()) ? 'selected' : ''; ?>
+								<option <?=$sel?> value="<?=$key?>"><?=$value?></option>
 							<?php } ?>
 						</select>
 						<span v-if="mModPer" class="text-danger">
@@ -62,8 +66,9 @@
 					<div class="form-group col-md-6">
 						<label>Módulo artículos</label>
 						<select <?=$dis?> class="form-control form-control-sm" name="modArt">
-							<?php foreach (Perfil::A_PER as $key => $value) { ?>
-								<option value="<?=$key?>"><?=$value?></option>
+							<?php foreach (Perfil::A_PER as $key => $value) {
+								$sel = ($key == $_Perfil->getModArt()) ? 'selected' : ''; ?>
+								<option <?=$sel?> value="<?=$key?>"><?=$value?></option>
 							<?php } ?>
 						</select>
 						<span v-if="mModArt" class="text-danger">

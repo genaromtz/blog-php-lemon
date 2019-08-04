@@ -91,6 +91,100 @@ class Perfil {
 		}
 	}
 
+	public function tienePermiso(string $mod, string $per) {
+		switch ($mod) {
+			case 'm_usuarios':
+				$perMod = $this->getModUsu();
+				break;
+			case 'm_perfiles':
+				$perMod = $this->getModPer();
+				break;
+			case 'm_articulos':
+				$perMod = $this->getModArt();
+				break;
+			default:
+				return false;
+				break;
+		}
+		if ($perMod >= $per && $this->getEstado() == self::PFL_ACT) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function editaPerfil(Usuario $_Usuario, array $aData) {
+		$aErr = $aBD = [];
+		$aCamEsp = ['nombre', 'estado', 'modUsu', 'modPer', 'modArt'];
+		foreach ($aData as $key => $value) {
+			if (in_array($key, $aCamEsp)) {
+				$$key = trim($value);
+			} else {
+				$aErr['errGral'] = "El campo {$key} no es aceptado";
+			}
+		}
+		$perEdi = $_Usuario->getPerfil()->tienePermiso('m_perfiles', self::PER_EDI);
+		if (!$perEdi) {
+			$aErr['errGral'] = 'No tiene permiso para realizar esta acción.';
+		}
+		if ($_Usuario->getId() <= 0) {
+			$aErr['errGral'] = 'El usuario no es válido';
+		} else {
+			$aBD['id_u_act'] = $_Usuario->getId();
+		}
+		if (empty($nombre)) {
+			$aErr['errNombre'] = 'El nombre es requerido';
+		} else {
+			$aBD['nombre'] = $nombre;
+		}
+		if (empty($estado)) {
+			$aErr['errEstado'] = 'El estado es requerido';
+		} else {
+			if (!array_key_exists($estado, self::EST_PFL)) {
+				$aErr['errEstado'] = 'El estado no es válido';
+			}
+			$aBD['estado'] = $estado;
+		}
+		if (empty($modUsu)) {
+			$aErr['errModUsu'] = 'El permiso de módulo de usuarios es requerido';
+		} else {
+			if (!array_key_exists($modUsu, self::A_PER)) {
+				$aErr['errModUsu'] = 'El permiso no es válido';
+			}
+			$aBD['m_usuarios'] = $modUsu;
+		}
+		if (empty($modPer)) {
+			$aErr['errModPer'] = 'El permiso de módulo de perfiles es requerido';
+		} else {
+			if (!array_key_exists($modPer, self::A_PER)) {
+				$aErr['errModPer'] = 'El permiso no es válido';
+			}
+			$aBD['m_perfiles'] = $modPer;
+		}
+		if (empty($modArt)) {
+			$aErr['errModArt'] = 'El permiso de módulo de artículos es requerido';
+		} else {
+			if (!array_key_exists($modArt, self::A_PER)) {
+				$aErr['errModArt'] = 'El permiso no es válido';
+			}
+			$aBD['m_articulos'] = $modArt;
+		}
+		if (empty($aErr)) {
+			$_BD = new Database();
+			$_BD->query('UPDATE perfiles SET nombre = :nombre, estado = :estado, m_usuarios = :m_usuarios, m_perfiles = :m_perfiles, m_articulos = :m_articulos, id_u_act = :id_u_act WHERE id = :id');
+			$_BD->bind(':id', $this->getId());
+			$_BD->bind(':nombre', $aBD['nombre']);
+			$_BD->bind(':estado', $aBD['estado']);
+			$_BD->bind(':m_usuarios', $aBD['m_usuarios']);
+			$_BD->bind(':m_perfiles', $aBD['m_perfiles']);
+			$_BD->bind(':m_articulos', $aBD['m_articulos']);
+			$_BD->bind(':id_u_act', $aBD['id_u_act']);
+			return ($_BD->execute()) ? true : false;
+		} else {
+			return $aErr;
+		}
+	}
+
 	/**
 	 * Crea perfil
 	 * @param object $_Usuario Autor del registro
