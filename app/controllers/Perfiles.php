@@ -14,14 +14,12 @@ class Perfiles extends Controller {
 	public function index() {
 		$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
 		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+		if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 		$colPer = Perfil::getPerfiles($_SESSION['usuario']);
 		require_once APPROOT . "/views/perfiles/index.php";
 	}
 
 	public function nuevo() {
-		$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
-		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
-		$dis = ($perEdi) ? '' : 'disabled';
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$aData = [
 				'nombre' => filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_FULL_SPECIAL_CHARS),
@@ -37,14 +35,15 @@ class Perfiles extends Controller {
 				echo json_encode(['tipo' => 1, 'msg' => 'Perfil creado con éxito']);
 			}
 		} else {
+			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
+			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+			if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
+			$dis = ($perEdi) ? '' : 'disabled';
 			require_once APPROOT . "/views/perfiles/nuevo.php";
 		}
 	}
 
 	public function editar($id) {
-		$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
-		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
-		$dis = ($perEdi) ? '' : 'disabled';
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 			$aData = [
@@ -55,14 +54,26 @@ class Perfiles extends Controller {
 				'modArt' => filter_input(INPUT_POST, 'modArt', FILTER_VALIDATE_INT)
 			];
 			$_Perfil = new Perfil($id);
-			$result = $_Perfil->editaPerfil($_SESSION['usuario'], $aData);
+			if ($_Perfil->getId() <= 0) { //Si el id perfil no existe
+				$result = ['errGral' => 'El perfil no es válido'];
+			} else {
+				$result = $_Perfil->editaPerfil($_SESSION['usuario'], $aData);
+			}
 			if ($result !== true) {
 				echo json_encode(['tipo' => 2, 'msg' => $result]);
 			} else {
 				echo json_encode(['tipo' => 1, 'msg' => 'Perfil actualizado con éxito']);
 			}
 		} else {
+			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
+			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+			if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
+			$dis = ($perEdi) ? '' : 'disabled';
+
+			if (filter_var($id, FILTER_VALIDATE_INT) <= 0) redirect('articulos/'); //El id tiene que ser integer
 			$_Perfil = new Perfil($id);
+			if ($_Perfil->getId() <= 0) redirect('articulos/'); //Si el id perfil no existe
+			if ($_Perfil->getId() <= 10) $dis = 'disabled'; //10 primeros registros protegidos
 			require_once APPROOT . "/views/perfiles/editar.php";
 		}
 	}

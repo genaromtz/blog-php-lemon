@@ -76,7 +76,7 @@
 						</span>
 					</div>
 				</div>
-				<?php if ($perEdi) { ?>
+				<?php if ($perEdi && $_Perfil->getId() >= 11) { ?>
 				<button class="btn btn-primary btn-sm" v-if="procesando"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...
 				</button>
 				<button type="submit" class="btn btn-primary btn-sm" v-else="procesando" v-on:click="proBtn">Aceptar</button>

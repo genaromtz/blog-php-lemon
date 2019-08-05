@@ -91,6 +91,14 @@ class Perfil {
 		}
 	}
 
+	/**
+	 * Determina si tiene acceso a un determiando
+	 * módulo según el nombre del mismo y permiso
+	 * @param string $mod Nombre de módulo
+	 * @param string $per Permiso
+	 * @return boolean true Tiene permiso
+	 * @return boolean true No tiene permiso
+	 */
 	public function tienePermiso(string $mod, string $per) {
 		switch ($mod) {
 			case 'm_usuarios':
@@ -113,6 +121,13 @@ class Perfil {
 		}
 	}
 
+	/**
+	 * Actualiza registro perfil
+	 * @param Usuario $_Usuario Usuario en sesión
+	 * @param array $aData Campos del formulario
+	 * @return boolean true Perfil actualizado
+	 * @return array Mensajes de validación
+	 */
 	public function editaPerfil(Usuario $_Usuario, array $aData) {
 		$aErr = $aBD = [];
 		$aCamEsp = ['nombre', 'estado', 'modUsu', 'modPer', 'modArt'];
