@@ -12,8 +12,8 @@ class Perfiles extends Controller {
 	}
 
 	public function index() {
-		$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
-		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+		$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_LEC);
+		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_EDI);
 		if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 		$colPer = Perfil::getPerfiles($_SESSION['usuario']);
 		require_once APPROOT . "/views/perfiles/index.php";
@@ -35,8 +35,8 @@ class Perfiles extends Controller {
 				echo json_encode(['tipo' => 1, 'msg' => 'Perfil creado con éxito']);
 			}
 		} else {
-			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
-			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_LEC);
+			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_EDI);
 			if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 			$dis = ($perEdi) ? '' : 'disabled';
 			require_once APPROOT . "/views/perfiles/nuevo.php";
@@ -65,8 +65,8 @@ class Perfiles extends Controller {
 				echo json_encode(['tipo' => 1, 'msg' => 'Perfil actualizado con éxito']);
 			}
 		} else {
-			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_LEC);
-			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::PER_EDI);
+			$perLec = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_LEC);
+			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_EDI);
 			if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 			$dis = ($perEdi) ? '' : 'disabled';
 

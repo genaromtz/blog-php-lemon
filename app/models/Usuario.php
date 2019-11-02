@@ -3,14 +3,14 @@ class Usuario {
 	/**
 	 * Estados
 	 */
-	const USU_ACT = 'Activo';
-	const USU_INA = 'Inactivo';
+	const E_ACT = 1;
+	const E_INA = 2;
 	/**
 	 * Arreglo de estados
 	 */
-	const EST_USU = [
-		self::USU_ACT => self::USU_ACT,
-		self::USU_INA => self::USU_INA
+	const A_EST = [
+		self::E_ACT => 'Activo',
+		self::E_INA => 'Inactivo'
 	];
 	/**
 	 * Propiedades
@@ -22,7 +22,6 @@ class Usuario {
 	private $correo;
 	private $clave;
 	private $estado;
-	private $imagen;
 	private $fh_reg;
 	private $fh_act;
 	/**
@@ -50,11 +49,11 @@ class Usuario {
 	public function getClave() {
 		return $this->clave;
 	}
-	public function getEstado() {
+	public function getEstado($mosDes = false) {
+		if ($mosDes) {
+			return self::A_EST[$this->estado];
+		}
 		return $this->estado;
-	}
-	public function getImagen() {
-		return $this->imagen;
 	}
 	public function getFecReg() {
 		return $this->fh_reg;
@@ -84,6 +83,72 @@ class Usuario {
 			}
 		} else {
 			return false;
+		}
+	}
+
+	public function editaUsuario(Usuario $_Usuario, Perfil $_Perfil, $aData) {
+		$aErr = $aBD = [];
+		$aCamEsp = ['nombre', 'apellido', 'correo', 'estado', 'clave', 'claveCon'];
+		foreach ($aData as $key => $value) {
+			if (in_array($key, $aCamEsp)) {
+				$$key = trim($value);
+			} else {
+				$aErr['errGral'] = "El campo {$key} no es aceptado";
+			}
+		}
+		if (empty($nombre)) {
+			$aErr['errNombre'] = 'Ingresa el nombre';
+		} else {
+			if ($this->getNombre() != $nombre) {
+				$aBD['nombre'] = $nombre;
+			}
+		}
+		if (empty($apellido)) {
+			$aErr['errApellido'] = 'Ingresa el apellido';
+		} else {
+			if ($this->getApellido() != $apellido) {
+				$aBD['apellido'] = $apellido;
+			}
+		}
+		if (empty($correo)) {
+			$aErr['errCorreo'] = 'Ingresa el correo electrónico';
+		} else {
+			if ($this->getCorreo() != $correo) {
+				$result = filter_var($correo, FILTER_VALIDATE_EMAIL);
+				if (empty($result)) {
+					$aErr['errCorreo'] = 'El correo electrónico no es válido';
+				} else {
+					$aFil = ['id' => $this->getId(), 'correo' => $correo, 'actUnico' => true];
+					$result = self::getUsuarios($aFil, false);
+					if (!empty($result)) {
+						$aErr['errCorreo'] = 'El correo ya fue ocupado';
+					} else {
+						$aBD['correo'] = $correo;
+					}
+				}
+			}
+		}
+		if ($_Perfil->getId() <= 0) {
+			$aErr['errPerfil'] = 'El perfil no es válido';
+		} else {
+			if ($this->getIdPerfil() != $_Perfil->getId()) {
+				$aBD['id_perfil'] = $_Perfil->getId();
+			}
+		}
+		if (empty($estado)) {
+			$aErr['errEstado'] = 'El estado es requerido';
+		} else {
+			if ($this->getEstado() != $estado) {
+				if (!array_key_exists($estado, self::A_EST)) {
+					$aErr['errEstado'] = 'El estado no es válido';
+				}
+				$aBD['estado'] = $estado;
+			}
+		}
+		if (empty($aErr)) {
+			return $this->actReg($aBD);
+		} else {
+			return $aErr;
 		}
 	}
 
@@ -119,7 +184,7 @@ class Usuario {
 			if ($_Usuario instanceof Usuario) {
 				$verificaClave = password_verify($clave, $_Usuario->getClave());
 				if ($verificaClave === true) {
-					if ($_Usuario->getEstado() == self::USU_ACT) {
+					if ($_Usuario->getEstado() == self::E_ACT) {
 						$_SESSION['id'] = $_Usuario->getId();
 						return true;
 					} else {
@@ -190,7 +255,7 @@ class Usuario {
 			}
 		}
 		if (empty($aErr)) {
-			$aBD['id_perfil'] = 1;
+			$aBD['id_perfil'] = 10;
 			$aBD['clave'] = password_hash($clave, PASSWORD_DEFAULT);
 			$aBD['fh_reg'] = date('Y-m-d H:i:s');
 
@@ -241,13 +306,41 @@ class Usuario {
 	private static function sqlUsuarios(array $aFil = null) {
 		$cond = '';
 		if (isset($aFil['id']) && !empty($aFil['id'])) {
-			$cond .= " AND usuarios.id = {$aFil['id']} ";
+			if (isset($aFil['actUnico']) && $aFil['actUnico'] === true) {
+				$cond .= " AND id <> {$aFil['id']} ";
+			} else {
+				$cond .= " AND id = {$aFil['id']} ";
+			}
 		}
 		if (isset($aFil['correo']) && !empty($aFil['correo'])) {
-			$cond .= " AND usuarios.correo = '{$aFil['correo']}' ";
+			$cond .= " AND correo = '{$aFil['correo']}' ";
 		}
 		$sql = "SELECT * FROM usuarios WHERE 1 {$cond}";
 		return $sql;
+	}
+
+	private function actReg(array $aData) {
+		$cond = '';
+		if (isset($aData['id_perfil'])) $cond .= "id_perfil = :id_perfil,";
+		if (isset($aData['nombre'])) $cond .= "nombre = :nombre,";
+		if (isset($aData['apellido'])) $cond .= "apellido = :apellido,";
+		if (isset($aData['correo'])) $cond .= "correo = :correo,";
+		if (isset($aData['clave'])) $cond .= "clave = :clave,";
+		if (isset($aData['estado'])) $cond .= "estado = :estado,";
+		if (!empty($cond)) {
+			$cond = trim($cond, ','); //Se elimina última coma
+			$_BD = new Database();
+			$_BD->query("UPDATE usuarios SET {$cond} WHERE id = :id");
+			$_BD->bind(':id', $this->getId());
+			if (isset($aData['id_perfil'])) $_BD->bind(':id_perfil', $aData['id_perfil']);
+			if (isset($aData['nombre'])) $_BD->bind(':nombre', $aData['nombre']);
+			if (isset($aData['apellido'])) $_BD->bind(':apellido', $aData['apellido']);
+			if (isset($aData['correo'])) $_BD->bind(':correo', $aData['correo']);
+			if (isset($aData['clave'])) $_BD->bind(':clave', $aData['clave']);
+			if (isset($aData['estado'])) $_BD->bind(':estado', $aData['estado']);
+			return ($_BD->execute()) ? true : false;
+		}
+		return true;
 	}
 
 	/**
@@ -268,7 +361,6 @@ class Usuario {
 			$this->correo = $row->correo;
 			$this->clave = $row->clave;
 			$this->estado = $row->estado;
-			$this->imagen = $row->imagen;
 			$this->fh_reg = $row->fh_reg;
 			$this->fh_act = $row->fh_act;
 			return true;

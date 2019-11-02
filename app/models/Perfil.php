@@ -3,28 +3,28 @@ class Perfil {
 	/**
 	 * Estados
 	 */
-	const PFL_ACT = 'Activo';
-	const PFL_INA = 'Inactivo';
+	const E_ACT = 1;
+	const E_INA = 2;
 	/**
 	 * Arreglo de estados
 	 */
-	const EST_PFL = [
-		self::PFL_ACT => self::PFL_ACT,
-		self::PFL_INA => self::PFL_INA
+	const A_EST = [
+		self::E_ACT => 'Activo',
+		self::E_INA => 'Inactivo'
 	];
 	/**
 	 * Permisos
 	 */
-	const PER_SACC = 1; //Sin acceso
-	const PER_LEC = 2; //Solo lectura
-	const PER_EDI = 3; //Edición
+	const P_SAC = 1; //Sin acceso
+	const P_LEC = 2; //Solo lectura
+	const P_EDI = 3; //Edición
 	/**
 	 * Listado de permisos
 	 */
 	const A_PER = [
-		self::PER_SACC => 'Sin Acceso',
-		self::PER_LEC => 'Solo Lectura',
-		self::PER_EDI => 'Edición'
+		self::P_SAC => 'Sin Acceso',
+		self::P_LEC => 'Solo Lectura',
+		self::P_EDI => 'Edición'
 	];
 	/**
 	 * Propiedades
@@ -48,7 +48,10 @@ class Perfil {
 	public function getNombre() {
 		return $this->nombre;
 	}
-	public function getEstado() {
+	public function getEstado($mosDes = false) {
+		if ($mosDes) {
+			return self::A_EST[$this->estado];
+		}
 		return $this->estado;
 	}
 	public function getModUsu() {
@@ -114,7 +117,7 @@ class Perfil {
 				return false;
 				break;
 		}
-		if ($perMod >= $per && $this->getEstado() == self::PFL_ACT) {
+		if ($perMod >= $per && $this->getEstado() == self::E_ACT) {
 			return true;
 		} else {
 			return false;
@@ -138,9 +141,9 @@ class Perfil {
 				$aErr['errGral'] = "El campo {$key} no es aceptado";
 			}
 		}
-		$perEdi = $_Usuario->getPerfil()->tienePermiso('m_perfiles', self::PER_EDI);
+		$perEdi = $_Usuario->getPerfil()->tienePermiso('m_perfiles', self::P_EDI);
 		if (!$perEdi) {
-			$aErr['errGral'] = 'No tiene permiso para realizar esta acción.';
+			$aErr['errGral'] = 'No tiene permiso para realizar esta acción';
 		}
 		if ($_Usuario->getId() <= 0) {
 			$aErr['errGral'] = 'El usuario no es válido';
@@ -150,12 +153,22 @@ class Perfil {
 		if (empty($nombre)) {
 			$aErr['errNombre'] = 'El nombre es requerido';
 		} else {
-			$aBD['nombre'] = $nombre;
+			if (strlen($nombre) > 50) {
+				$aErr['errNombre'] = 'El nombre excedió el máximo de caracteres permitidos';
+			} else {
+				$aFil = ['id' => $this->getId(), 'nombre' => $nombre, 'actUnico' => true];
+				$val = self::getPerfiles($_Usuario, $aFil, false);
+				if (!empty($val)) {
+					$aErr['errNombre'] = 'El nombre ya fue ocupado';
+				} else {
+					$aBD['nombre'] = $nombre;
+				}
+			}
 		}
 		if (empty($estado)) {
 			$aErr['errEstado'] = 'El estado es requerido';
 		} else {
-			if (!array_key_exists($estado, self::EST_PFL)) {
+			if (!array_key_exists($estado, self::A_EST)) {
 				$aErr['errEstado'] = 'El estado no es válido';
 			}
 			$aBD['estado'] = $estado;
@@ -223,29 +236,53 @@ class Perfil {
 			$aBD['id_u_reg'] = $_Usuario->getId();
 			$aBD['id_u_act'] = $_Usuario->getId();
 		}
+		$perEdi = $_Usuario->getPerfil()->tienePermiso('m_perfiles', self::P_EDI);
+		if (!$perEdi) {
+			$aErr['errGral'] = 'No tiene permiso para realizar esta acción';
+		}
 		if (empty($nombre)) {
 			$aErr['errNombre'] = 'El nombre es requerido';
 		} else {
-			$aBD['nombre'] = $nombre;
+			if (strlen($nombre) > 50) {
+				$aErr['errNombre'] = 'El nombre excedió el máximo de caracteres permitidos';
+			} else {
+				$val = self::getPerfiles($_Usuario, ['nombre' => $nombre], false);
+				if (!empty($val)) {
+					$aErr['errNombre'] = 'El nombre ya fue ocupado';
+				}
+				$aBD['nombre'] = $nombre;
+			}
 		}
 		if (empty($estado)) {
 			$aErr['errEstado'] = 'El estado es requerido';
 		} else {
+			if (!array_key_exists($estado, self::A_EST)) {
+				$aErr['errEstado'] = 'El estado no es válido';
+			}
 			$aBD['estado'] = $estado;
 		}
 		if (empty($modUsu)) {
 			$aErr['errModUsu'] = 'El permiso de módulo de usuarios es requerido';
 		} else {
+			if (!array_key_exists($modUsu, self::A_PER)) {
+				$aErr['errModUsu'] = 'El permiso no es válido';
+			}
 			$aBD['m_usuarios'] = $modUsu;
 		}
 		if (empty($modPer)) {
 			$aErr['errModPer'] = 'El permiso de módulo de perfiles es requerido';
 		} else {
+			if (!array_key_exists($modPer, self::A_PER)) {
+				$aErr['errModPer'] = 'El permiso no es válido';
+			}
 			$aBD['m_perfiles'] = $modPer;
 		}
 		if (empty($modArt)) {
 			$aErr['errModArt'] = 'El permiso de módulo de artículos es requerido';
 		} else {
+			if (!array_key_exists($modArt, self::A_PER)) {
+				$aErr['errModArt'] = 'El permiso no es válido';
+			}
 			$aBD['m_articulos'] = $modArt;
 		}
 		if (empty($aErr)) {
@@ -300,7 +337,17 @@ class Perfil {
 	private static function sqlPerfiles(Usuario $_Usuario, array $aFil = null) {
 		$cond = '';
 		if (isset($aFil['id']) && !empty($aFil['id'])) {
-			$cond .= " AND perfiles.id = {$aFil['id']} ";
+			if (isset($aFil['actUnico']) && $aFil['actUnico'] === true) {
+				$cond .= " AND id <> {$aFil['id']} ";
+			} else {
+				$cond .= " AND id = {$aFil['id']} ";
+			}
+		}
+		if (isset($aFil['estado']) && !empty($aFil['estado'])) {
+			$cond .= " AND estado = {$aFil['estado']} ";
+		}
+		if (isset($aFil['nombre']) && !empty($aFil['nombre'])) {
+			$cond .= " AND nombre = '{$aFil['nombre']}' ";
 		}
 		$sql = "SELECT * FROM perfiles WHERE 1 {$cond}";
 		return $sql;

@@ -25,7 +25,7 @@
 					<div class="form-group col-md-6">
 						<label>Estado</label>
 						<select <?=$dis?> class="form-control form-control-sm" name="estado">
-							<?php foreach (Perfil::EST_PFL as $key => $value) { ?>
+							<?php foreach (Perfil::A_EST as $key => $value) { ?>
 								<option value="<?=$key?>"><?=$value?></option>
 							<?php } ?>
 						</select>

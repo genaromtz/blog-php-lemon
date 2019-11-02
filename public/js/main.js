@@ -5,6 +5,8 @@ const appUsuario = new Vue({
 		mNombre: '',
 		mApellido: '',
 		mCorreo: '',
+		mPerfil: '',
+		mEstado: '',
 		mContra: '',
 		mContraCon: '',
 		mGral: '',
@@ -32,6 +34,32 @@ const appUsuario = new Vue({
 					this.mCorreo = res.data.msg.errCorreo
 					this.mContra = res.data.msg.errClave
 					this.mContraCon = res.data.msg.errClaveCon
+					this.procesando = false
+				}
+			})
+		},
+		editaUsuario(e) {
+			formData = new FormData(e.target);
+			axios.post('editar', formData).then(res => {
+				if (res.data.tipo == 1) {
+					this.success = res.data.msg
+					this.mNombre = ''
+					this.mApellido = ''
+					this.mCorreo = ''
+					this.mPerfil = ''
+					this.mEstado = ''
+					this.mGral = ''
+					this.procesando = false
+					setTimeout(() => {
+						this.success = ''
+					}, 6000)
+				} else if (res.data.tipo == 2) {
+					this.mNombre = res.data.msg.errNombre
+					this.mApellido = res.data.msg.errApellido
+					this.mCorreo = res.data.msg.errCorreo
+					this.mPerfil = res.data.msg.errPerfil
+					this.mEstado = res.data.msg.errEstado
+					this.mGral = res.data.msg.errGral
 					this.procesando = false
 				}
 			})
@@ -108,7 +136,7 @@ const appPerfil = new Vue({
 					this.mModArt = ''
 					this.mGral = ''
 					this.procesando = false
-					 //e.target.reset()
+					//e.target.reset() - No necesario al editar
 					setTimeout(() => {
 						this.success = ''
 					}, 6000)

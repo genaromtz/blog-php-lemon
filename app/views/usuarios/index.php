@@ -1,21 +1,10 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
-
-<?php if ($perEdi) { ?>
-<div class="container mt-3">
-	<div class="row">
-		<div class="col-md-3">
-			<a href="<?=URLROOT?>/perfiles/nuevo" title="Nuevo perfil" class="btn btn-primary btn-block">Nuevo</a>
-		</div>
-	</div>
-</div>
-<?php } ?>
-
 <div class="container mt-3">
 	<div class="row">
 		<div class="col-md-12">
 			<div class="card">
 				<div class="card-header">
-					<h4>Catálogo de perfiles</h4>
+					<h4>Catálogo de usuarios</h4>
 				</div>
 				<table class="table table-striped">
 					<thead class="thead-dark">
@@ -27,13 +16,13 @@
 						</tr>
 					</thead>
 					<tbody>
-						<?php foreach ($colPer as $_Perfil) { ?>
+						<?php foreach ($colUsu as $_Usuario) { ?>
 							<tr>
-								<td class="text-wrap"><?=$_Perfil->getFecReg()?></td>
-								<td class="text-wrap"><?=$_Perfil->getNombre()?></td>
-								<td class="text-wrap"><?=$_Perfil->getEstado(true)?></td>
+								<td class="text-wrap"><?=$_Usuario->getFecReg()?></td>
+								<td class="text-wrap"><?=$_Usuario->getNombre().' '.$_Usuario->getApellido()?></td>
+								<td class="text-wrap"><?=$_Usuario->getEstado(true)?></td>
 								<td>
-									<a href="<?=URLROOT?>/perfiles/editar/<?=$_Perfil->getId()?>">
+									<a href="<?=URLROOT?>/usuarios/editar/<?=$_Usuario->getId()?>">
 										<i class="fa fa-eye"></i>
 									</a>
 								</td>

@@ -8,7 +8,9 @@
             <li class="nav-item active">
                 <a class="nav-link" href="<?=URLROOT?>">Inicio <span class="sr-only">(current)</span></a>
             </li>
-            <?php if (tieneSesion()) { ?>
+            <?php if (tieneSesion()) {
+                $perLecPer = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_LEC);
+                $perLecUsu = $_SESSION['usuario']->getPerfil()->tienePermiso('m_usuarios', Perfil::P_LEC); ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Usuarios
                     </a>
@@ -17,13 +19,20 @@
                         <a class="dropdown-item" href="#">Listado de usuarios</a>
                     </div>
                 </li>
+                <?php if ($perLecPer || $perLecUsu) { ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Catálogos
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <?php if ($perLecPer) { ?>
                         <a class="dropdown-item" href="<?=URLROOT?>/perfiles/">Perfiles</a>
+                        <?php } ?>
+                        <?php if ($perLecUsu) { ?>
+                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/">Usuarios</a>
+                        <?php } ?>
                     </div>
                 </li>
+                <?php } ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?=$_SESSION['usuario']->getNombre()?>
                     </a>
