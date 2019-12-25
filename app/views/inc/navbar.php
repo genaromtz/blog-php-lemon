@@ -11,24 +11,17 @@
             <?php if (tieneSesion()) {
                 $perLecPer = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_LEC);
                 $perLecUsu = $_SESSION['usuario']->getPerfil()->tienePermiso('m_usuarios', Perfil::P_LEC); ?>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Usuarios
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="#">Nuevo usuario</a>
-                        <a class="dropdown-item" href="#">Listado de usuarios</a>
-                    </div>
-                </li>
+                
                 <?php if ($perLecPer || $perLecUsu) { ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Catálogos
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <?php if ($perLecPer) { ?>
-                        <a class="dropdown-item" href="<?=URLROOT?>/perfiles/">Perfiles</a>
+                        <a class="dropdown-item" href="<?=URLROOT?>/perfiles/"><i class="fas fa-users-cog"></i> Perfiles</a>
                         <?php } ?>
                         <?php if ($perLecUsu) { ?>
-                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/">Usuarios</a>
+                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/"><i class="fas fa-users"></i> Usuarios</a>
                         <?php } ?>
                     </div>
                 </li>
@@ -37,11 +30,8 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?=$_SESSION['usuario']->getNombre()?>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="#">Mis artículos</a>
-                        <a class="dropdown-item" href="#">Perfil</a>
-                        <a class="dropdown-item" href="#">Imagen de perfil</a>
-                        <a class="dropdown-item" href="#">Cuenta</a>
-                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/logout">Cerrar sesión</a>
+                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/perfil"><i class="fas fa-user"></i> Mi perfil</a>
+                        <a class="dropdown-item" href="<?=URLROOT?>/usuarios/logout"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
                     </div>
                 </li>
             <?php } else { ?>

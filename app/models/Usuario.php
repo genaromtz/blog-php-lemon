@@ -49,6 +49,14 @@ class Usuario {
 	public function getClave() {
 		return $this->clave;
 	}
+	/**
+	 * Estado del usuario
+	 * @param boolean $mosDes true: Retorna la
+	 * descripción del estado
+	 * @param boolean $mosDes false: Retorna
+	 * el valor entero del estadi
+	 * @return string | integer
+	 */
 	public function getEstado($mosDes = false) {
 		if ($mosDes) {
 			return self::A_EST[$this->estado];
@@ -86,9 +94,21 @@ class Usuario {
 		}
 	}
 
-	public function editaUsuario(Usuario $_Usuario, Perfil $_Perfil, $aData) {
+	/**
+	 * Actualiza información del usuario
+	 * @param object Usuario|null
+	 * - Usuario: se toma como actualización de un perfil con acceso
+	 * - Null: se toma como actualización de usuario cliente
+	 * @param object Perfil|null
+	 * - Perfil: se toma como actualización de un perfil con acceso
+	 * - Null: se toma como actualización de usuario cliente
+	 * @param array $aData Campos del formulario
+	 * @return boolean true Usuario actualizado
+	 * @return array Mensajes de validación
+	 */
+	public function editaUsuario(Usuario $_Usuario = null, Perfil $_Perfil = null, $aData) {
 		$aErr = $aBD = [];
-		$aCamEsp = ['nombre', 'apellido', 'correo', 'estado', 'clave', 'claveCon'];
+		$aCamEsp = ['nombre', 'apellido', 'correo', 'estado', 'clave', 'claveCon', 'claveAct'];
 		foreach ($aData as $key => $value) {
 			if (in_array($key, $aCamEsp)) {
 				$$key = trim($value);
@@ -128,21 +148,45 @@ class Usuario {
 				}
 			}
 		}
-		if ($_Perfil->getId() <= 0) {
-			$aErr['errPerfil'] = 'El perfil no es válido';
-		} else {
-			if ($this->getIdPerfil() != $_Perfil->getId()) {
-				$aBD['id_perfil'] = $_Perfil->getId();
+		if (isset($claveAct) && !empty($claveAct) || isset($clave) && !empty($clave) 
+			|| isset($claveCon) && !empty($claveCon)) {
+			$verificaClave = password_verify($claveAct, $this->getClave());
+			if ($verificaClave !== true) {
+				$aErr['errClaveAct'] = 'Su clave es incorrecta';
+			}
+			if (empty($clave)) { //Nueva clave
+				$aErr['errClave'] = 'Ingresa una contraseña';
+			}
+			if (empty($claveCon)) { //Confirmación de nueva clave
+				$aErr['errClaveCon'] = 'Confirma tu contraseña';
+			} else {
+				if ($clave != $claveCon) {
+					$aErr['errClave'] = 'Las contraseñas no coinciden';
+					$aErr['errClaveCon'] = 'Las contraseñas no coinciden';
+				} else {
+					$aBD['clave'] = password_hash($clave, PASSWORD_DEFAULT);
+				}
 			}
 		}
-		if (empty($estado)) {
-			$aErr['errEstado'] = 'El estado es requerido';
-		} else {
-			if ($this->getEstado() != $estado) {
-				if (!array_key_exists($estado, self::A_EST)) {
-					$aErr['errEstado'] = 'El estado no es válido';
+		if ($_Perfil instanceof Perfil) {
+			if ($_Perfil->getId() <= 0) {
+				$aErr['errPerfil'] = 'El perfil no es válido';
+			} else {
+				if ($this->getIdPerfil() != $_Perfil->getId()) {
+					$aBD['id_perfil'] = $_Perfil->getId();
 				}
-				$aBD['estado'] = $estado;
+			}
+		}
+		if (isset($estado)) {
+			if (empty($estado)) {
+				$aErr['errEstado'] = 'El estado es requerido';
+			} else {
+				if ($this->getEstado() != $estado) {
+					if (!array_key_exists($estado, self::A_EST)) {
+						$aErr['errEstado'] = 'El estado no es válido';
+					}
+					$aBD['estado'] = $estado;
+				}
 			}
 		}
 		if (empty($aErr)) {
@@ -208,7 +252,7 @@ class Usuario {
 	 * @return boolean true Usuario creado con éxito
 	 * @return array Mensajes de validación
 	 */
-	public static function creaUsuario(array $aData) {
+	public static function creaUsuario(array $aData, Usuario $_Usuario = null, Perfil $_Perfil = null) {
 		$aErr = $aBD = [];
 		$aCamEsp = ['id_perfil', 'nombre', 'apellido', 'correo', 'clave', 'claveCon'];
 		foreach ($aData as $key => $value) {
@@ -216,6 +260,15 @@ class Usuario {
 				$$key = trim($value);
 			} else {
 				$aErr['errDato'] = "El campo {$key} no es aceptado";
+			}
+		}
+		if ($_Usuario instanceof Usuario) {
+			if ($_Usuario->getId() <= 0) {
+				$aErr['errGral'] = 'El usuario no es válido';
+			}
+			$perEdi = $_Usuario->getPerfil()->tienePermiso('m_usuarios', Perfil::P_EDI);
+			if (!$perEdi) {
+				$aErr['errGral'] = 'No tiene permiso para realizar esta acción';
 			}
 		}
 		if (empty($nombre)) {
@@ -254,8 +307,16 @@ class Usuario {
 				$aErr['errClaveCon'] = 'Las contraseñas no coinciden';
 			}
 		}
-		if (empty($aErr)) {
+		if ($_Perfil instanceof Perfil) {
+			if ($_Perfil->getId() <= 0) {
+				$aErr['errPerfil'] = 'El perfil no es válido';
+			} else {
+				$aBD['id_perfil'] = $_Perfil->getId();
+			}
+		} else {
 			$aBD['id_perfil'] = 10;
+		}
+		if (empty($aErr)) {
 			$aBD['clave'] = password_hash($clave, PASSWORD_DEFAULT);
 			$aBD['fh_reg'] = date('Y-m-d H:i:s');
 
@@ -319,6 +380,14 @@ class Usuario {
 		return $sql;
 	}
 
+	/**
+	 * Actualiza registro en base al arreglo de datos
+	 * recibido, analizar bien los datos enviados en el arreglo
+	 * pues tal cual se envian, se guardan
+	 * @param array $aData Datos actualizar
+	 * @return boolean true Datos actualizados
+	 * @return boolean false Fallo en base de datos
+	 */
 	private function actReg(array $aData) {
 		$cond = '';
 		if (isset($aData['id_perfil'])) $cond .= "id_perfil = :id_perfil,";

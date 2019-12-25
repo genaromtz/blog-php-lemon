@@ -1,4 +1,15 @@
 <?php require APPROOT . '/views/inc/header.php'; ?>
+
+<?php if ($perEdi) { ?>
+<div class="container mt-3">
+	<div class="row">
+		<div class="col-md-3">
+			<a href="<?=URLROOT?>/usuarios/nuevo" title="Nuevo usuario" class="btn btn-primary btn-block">Nuevo</a>
+		</div>
+	</div>
+</div>
+<?php } ?>
+
 <div class="container mt-3">
 	<div class="row">
 		<div class="col-md-12">

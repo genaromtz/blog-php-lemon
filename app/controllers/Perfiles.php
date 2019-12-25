@@ -16,7 +16,7 @@ class Perfiles extends Controller {
 		$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_EDI);
 		if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 		$colPer = Perfil::getPerfiles($_SESSION['usuario']);
-		require_once APPROOT . "/views/perfiles/index.php";
+		require_once APPROOT . '/views/perfiles/index.php';
 	}
 
 	public function nuevo() {
@@ -39,7 +39,7 @@ class Perfiles extends Controller {
 			$perEdi = $_SESSION['usuario']->getPerfil()->tienePermiso('m_perfiles', Perfil::P_EDI);
 			if (!$perLec) redirect('articulos/'); //No tiene permiso lectura
 			$dis = ($perEdi) ? '' : 'disabled';
-			require_once APPROOT . "/views/perfiles/nuevo.php";
+			require_once APPROOT . '/views/perfiles/nuevo.php';
 		}
 	}
 
@@ -74,7 +74,7 @@ class Perfiles extends Controller {
 			$_Perfil = new Perfil($id);
 			if ($_Perfil->getId() <= 0) redirect('articulos/'); //Si el id perfil no existe
 			if ($_Perfil->getId() <= 10) $dis = 'disabled'; //10 primeros registros protegidos
-			require_once APPROOT . "/views/perfiles/editar.php";
+			require_once APPROOT . '/views/perfiles/editar.php';
 		}
 	}
 }

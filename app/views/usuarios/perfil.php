@@ -3,8 +3,7 @@
 	<div class="col-md-6 mx-auto">
 		<div class="card card-body bg-light mt-3">
 			<h2>Actualizar usuario</h2>
-			<form @submit.prevent="editaUsuario" v-cloak>
-				<input type="hidden" name="id" value="<?=$_Usuario->getId()?>">
+			<form @submit.prevent="actPerfil" v-cloak>
 				<transition name="fade">
 					<span class="text-success u-flexColumnCenter alert alert-success" v-if="success">
 						<i class="fas fa-check-circle fa-sm mr-1"></i>{{success}}
@@ -18,59 +17,58 @@
 				<div class="form-row">
 					<div class="form-group col-md-6">
 						<label>Nombre</label>
-						<input <?=$dis?> type="text" class="form-control form-control-sm" name="nombre" value="<?=$_Usuario->getNombre()?>">
+						<input type="text" class="form-control form-control-sm" name="nombre" value="<?=$_Usuario->getNombre()?>">
 						<span v-if="mNombre" class="text-danger">
 							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mNombre}}
 						</span>
 					</div>
 					<div class="form-group col-md-6">
 						<label>Apellido</label>
-						<input <?=$dis?> type="text" class="form-control form-control-sm" name="apellido" value="<?=$_Usuario->getApellido()?>">
+						<input type="text" class="form-control form-control-sm" name="apellido" value="<?=$_Usuario->getApellido()?>">
 						<span v-if="mApellido" class="text-danger">
 							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mApellido}}
 						</span>
 					</div>
 				</div>
 				<div class="form-row">
-					<div class="form-group col-md-12">
+					<div class="form-group col-md-6">
 						<label>Correo electrónico</label>
-						<input <?=$dis?> type="text" class="form-control form-control-sm" name="correo" value="<?=$_Usuario->getCorreo()?>">
+						<input type="text" class="form-control form-control-sm" name="correo" value="<?=$_Usuario->getCorreo()?>">
 						<span v-if="mCorreo" class="text-danger">
 							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mCorreo}}
 						</span>
 					</div>
 				</div>
+				<hr>
+				<div class="alert alert-primary" role="alert"><i class="fas fa-info-circle"></i> Si no quieres cambiar tu contraseña deja los siguientes campos en blanco</div>
 				<div class="form-row">
 					<div class="form-group col-md-6">
-						<label>Perfil</label>
-						<select <?=$dis?> class="form-control form-control-sm" name="perfil">
-							<?php foreach ($aPer as $key) {
-								$sel = ($key->id == $_Usuario->getPerfil()->getId()) ? 'selected' : ''; ?>
-								<option <?=$sel?> value="<?=$key->id?>"><?=$key->nombre?></option>
-							<?php } ?>
-						</select>
-						<span v-if="mPerfil" class="text-danger">
-							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mPerfil}}
+						<label>Contraseña actual</label>
+						<input type="password" class="form-control form-control-sm" name="claveAct">
+						<span v-if="mContraAct" class="text-danger">
+							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mContraAct}}
 						</span>
 					</div>
 					<div class="form-group col-md-6">
-						<label>Estado</label>
-						<select <?=$dis?> class="form-control form-control-sm" name="estado">
-							<?php foreach (Usuario::A_EST as $key => $value) {
-								$sel = ($key == $_Usuario->getEstado()) ? 'selected' : ''; ?>
-								<option <?=$sel?> value="<?=$key?>"><?=$value?></option>
-							<?php } ?>
-						</select>
-						<span v-if="mEstado" class="text-danger">
-							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mEstado}}
+						<label>Nueva contraseña</label>
+						<input type="password" class="form-control form-control-sm" name="clave">
+						<span v-if="mContra" class="text-danger">
+							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mContra}}
 						</span>
 					</div>
 				</div>
-				<?php if ($perEdi && $_Usuario->getId() >= 11) { ?>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label>Vuelve a escribir la nueva contraseña</label>
+						<input type="password" class="form-control form-control-sm" name="claveCon">
+						<span v-if="mContraCon" class="text-danger">
+							<i class="fas fa-exclamation-circle fa-sm mr-1"></i>{{mContraCon}}
+						</span>
+					</div>
+				</div>
 				<button class="btn btn-primary btn-sm" v-if="procesando"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...
 				</button>
 				<button type="submit" class="btn btn-primary btn-sm" v-else="procesando" v-on:click="proBtn">Aceptar</button>
-				<?php } ?>
 			</form>
 		</div>
 	</div>
